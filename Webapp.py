@@ -57,4 +57,31 @@ def add_transaction():
     return jsonify(response), 201
 
 
+@web_app.route('/connect_node', methods=['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if (nodes is None) or (len(nodes) == 0):
+        response = {'message': 'There were no nodes posted.'}
+        return jsonify(response), 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {'message': 'Nodes were updated.', 
+                'nodes': list(blockchain.nodes)}
+    return jsonify(response), 201
+
+
+@web_app.route('/replace_chain', methods=['GET'])
+def replace_chain():
+    status = blockchain.update_chain()
+    if (status == True):
+        response = {'message': 'chain was replaced with longer chain.',
+                    'chain': blockchain.chain}
+    else:
+        response = {'message': 'This node has the longest chain.',
+                    'chain': blockchain.chain}
+    return jsonify(response), 200
+
+
+
 web_app.run(host='0.0.0.0', port=5000)

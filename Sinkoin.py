@@ -8,14 +8,20 @@ import datetime
 import hashlib
 from flask import Flask, jsonify, request
 import requests
+import json
 from uuid import uuid4
 from urllib.parse import urlparse
 
 LEADING_ZEROES = 4
 COINS_REWARDED_PER_MINE = 50
 
-#TODO: add public keys and private keys use randoms and eliptic curve cryptography. add signing transactions and the function that checks this.
-#TODO: add '/get_random_private_key' to the web app. make mining a real shit. make blockchains update.
+#TODO: add public keys and private keys use randoms and eliptic curve cryptography. 
+#TODO: add signing transactions and the function that checks this.
+#TODO: add '/get_random_private_key' to the web app. make mining a real shit. 
+#TODO: make blockchains update automatically.
+#TODO: find a way to verify code integrity.
+#TODO: function for Transaction integrity. transaction ID.
+#TODO: Update Block verification.
 class Sinkoin:
     """
     This object stores a single chain from the block chain.
@@ -63,7 +69,8 @@ class Sinkoin:
             previous_block = chain[i-1]
             if (block['previous_hash'] != self.hash_block(previous_block)):
                 return False
-            if (self.get_proof_hash(block['proof'], previous_block['proof'])[:LEADING_ZEROES] != LEADING_ZEROES*'0'):
+            if (self.get_proof_hash(block['proof'], 
+                previous_block['proof'])[:LEADING_ZEROES] != LEADING_ZEROES*'0'):
                 return False
         return True
     
@@ -82,14 +89,16 @@ class Sinkoin:
         longest_chain = None
         max_length = len(self.chain)
         for node in network:
-            response = requests.get(f"http://{node}/get_chain")
+            response = requests.get(f"http://{node}/chain")
             if response.status_code == 200:
                 lenght = response.json()['lenght']
                 chain = response.json()['chain']
                 if ((lenght > max_length) and (self.is_chain_valid(chain))):
                     longest_chain = chain
-                    max_length = lengh
+                    max_length = lenght
+            else:
+                print(f'node {node} was not online.')
         if (longest_chain):
+            self.chain = longest_chain
             return True
-            self.chain = chain
         return False
