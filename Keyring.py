@@ -51,7 +51,7 @@ Just a simple code to demonstrate the functionality of code.
 
 x = get_private_key(address='')
 a = get_public_key(x,address='')
-message = 'amme kharab'
+message = 'someMessage'
 z = sign_message(x,message.encode())
 verify_message (a, message.encode(), z)
 verify_message (a, message.encode(), 'notRealSignature')
